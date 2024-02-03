@@ -9,6 +9,11 @@ import ParticlesBg from "particles-bg";
 
 function App() {
   const [input, setInput] = useState("");
+
+  const onInputChange = (e) => {
+    setInput(e.target.value);
+  };
+
   const [boxBorder, setBoxBorder] = useState({});
 
   const calculateFacePosition = (data) => {
@@ -23,10 +28,6 @@ function App() {
       rightCol: width - clarifiFace.right_col * width,
       bottomRow: height - clarifiFace.bottom_row * height,
     };
-  };
-
-  const onInputChange = (e) => {
-    setInput(e.target.value);
   };
 
   const returnClarifiRequestOptions = (imageUrl) => {
@@ -63,7 +64,11 @@ function App() {
     return requestOptions;
   };
 
+  const [isDetecting, setIsDetecting] = useState(false);
+
   const onBtnSubmit = () => {
+    setIsDetecting(true);
+
     fetch(
       "https://api.clarifai.com/v2/models/" + "face-detection" + "/outputs",
       returnClarifiRequestOptions(input)
@@ -72,15 +77,23 @@ function App() {
       .then((result) => {
         const boundingBox =
           result.outputs[0]?.data?.regions[0]?.region_info?.bounding_box;
+
         if (boundingBox) {
           console.log(boundingBox);
           const facePosition = calculateFacePosition(result);
           console.log(facePosition);
+          setBoxBorder(facePosition);
         } else {
           console.log("No face detected");
+          setBoxBorder({});
         }
+
+        setIsDetecting(false);
       })
-      .catch((error) => console.log("error", error));
+      .catch((error) => {
+        setIsDetecting(false);
+        console.log("error", error);
+      });
   };
 
   return (
@@ -98,9 +111,9 @@ function App() {
         <Rank />
         <ImageLinkForm
           onInputChange={onInputChange}
-          onBtnSubmit={onBtnSubmit}
+          buttonSubmit={onBtnSubmit}
         />
-        <FaceRecognition imageUrl={input} box={boxBorder} />
+        <FaceRecognition imageUrl={input} box={boxBorder} isDetecting={false} />
       </div>
     </div>
   );

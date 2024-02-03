@@ -5,7 +5,8 @@ import brain from "./brain.png";
 
 const Logo = () => {
   return (
-    <div>
+    <div className="ma4 mt0">
+      {/* I used react tilt library to hover and tilt an image */}
       <Tilt
         className="Tilt br2 shadow-2"
         optins={{ max: 55 }}
