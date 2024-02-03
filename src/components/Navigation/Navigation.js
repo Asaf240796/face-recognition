@@ -1,6 +1,6 @@
 import React from "react";
 
-export const Navigation = () => {
+const Navigation = () => {
   return (
     <div>
       <nav style={{ display: "flex", justifyContent: "flex-end" }}>
