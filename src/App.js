@@ -4,17 +4,21 @@ import Logo from "./components/Logo/Logo.js";
 import ImageLinkForm from "./components/ImageLinkForm/ImageLinkForm.js";
 import Rank from "./components/Rank/Rank.js";
 import FaceRecognition from "./components/FaceRecognition/FaceRecognition.js";
+import SignIn from "./components/SignIn/SignIn.js";
+import Register from "./components/Register/Register.js";
 import React, { useState } from "react";
 import ParticlesBg from "particles-bg";
 
 function App() {
   const [input, setInput] = useState("");
+  const [boxBorder, setBoxBorder] = useState({});
+  const [img, setImg] = useState("");
+  const [route, setRoute] = useState("signInPage");
+  const [isSignIn, setIsSignIn] = useState(false);
 
   const onInputChange = (e) => {
     setInput(e.target.value);
   };
-
-  const [boxBorder, setBoxBorder] = useState({});
 
   const calculateFacePosition = (data) => {
     const clarifiFace =
@@ -22,6 +26,7 @@ function App() {
     const image = document.getElementById("inputImage");
     const width = Number(image.width);
     const height = Number(image.height);
+
     return {
       leftCol: clarifiFace.left_col * width,
       topRow: clarifiFace.top_row * height,
@@ -64,11 +69,8 @@ function App() {
     return requestOptions;
   };
 
-  const [isDetecting, setIsDetecting] = useState(false);
-
   const onBtnSubmit = () => {
-    setIsDetecting(true);
-
+    setImg(input);
     fetch(
       "https://api.clarifai.com/v2/models/" + "face-detection" + "/outputs",
       returnClarifiRequestOptions(input)
@@ -87,15 +89,28 @@ function App() {
           console.log("No face detected");
           setBoxBorder({});
         }
-
-        setIsDetecting(false);
       })
       .catch((error) => {
-        setIsDetecting(false);
         console.log("error", error);
       });
   };
 
+  const onRouteChange = (route) => {
+    if (route === "signout") {
+      setIsSignIn(false);
+    } else if (route === "home") {
+      setIsSignIn(true);
+    }
+    setRoute(route);
+  };
+
+  const renderRoute = () => {
+    if (route === "signInPage") {
+      return <SignIn onRouteChange={onRouteChange} />;
+    } else {
+      return <Register onRouteChange={onRouteChange} />;
+    }
+  };
   return (
     <div className="App">
       <ParticlesBg
@@ -105,16 +120,20 @@ function App() {
         color="#ff0000"
         num={200}
       />
-      <Navigation />
-      <div>
-        <Logo />
-        <Rank />
-        <ImageLinkForm
-          onInputChange={onInputChange}
-          buttonSubmit={onBtnSubmit}
-        />
-        <FaceRecognition imageUrl={input} box={boxBorder} isDetecting={false} />
-      </div>
+      <Navigation isSignIn={isSignIn} onRouteChange={onRouteChange} />
+      {route === "home" ? (
+        <div>
+          <Logo />
+          <Rank />
+          <ImageLinkForm
+            onInputChange={onInputChange}
+            buttonSubmit={onBtnSubmit}
+          />
+          <FaceRecognition imageUrl={img} box={boxBorder} />
+        </div>
+      ) : (
+        renderRoute()
+      )}
     </div>
   );
 }
