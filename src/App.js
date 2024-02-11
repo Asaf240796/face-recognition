@@ -6,7 +6,7 @@ import Rank from "./components/Rank/Rank.js";
 import FaceRecognition from "./components/FaceRecognition/FaceRecognition.js";
 import SignIn from "./components/SignIn/SignIn.js";
 import Register from "./components/Register/Register.js";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ParticlesBg from "particles-bg";
 
 function App() {
@@ -15,6 +15,12 @@ function App() {
   const [img, setImg] = useState("");
   const [route, setRoute] = useState("signInPage");
   const [isSignIn, setIsSignIn] = useState(false);
+
+  useEffect(() => {
+    fetch("http://localhost:1234/")
+      .then((response) => response.json())
+      .then((data) => console.log(data));
+  });
 
   const onInputChange = (e) => {
     setInput(e.target.value);
