@@ -16,12 +16,6 @@ function App() {
   const [route, setRoute] = useState("signInPage");
   const [isSignIn, setIsSignIn] = useState(false);
 
-  useEffect(() => {
-    fetch("http://localhost:1234/")
-      .then((response) => response.json())
-      .then((data) => console.log(data));
-  });
-
   const onInputChange = (e) => {
     setInput(e.target.value);
   };
