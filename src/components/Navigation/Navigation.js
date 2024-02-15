@@ -16,7 +16,7 @@ const Navigation = ({ onRouteChange, isSignIn }) => {
     return (
       <nav style={{ display: "flex", justifyContent: "flex-end" }}>
         <p
-          onClick={() => onRouteChange("signInPage")}
+          onClick={() => onRouteChange("signin")}
           className="pa3 pointer underline link dim f3"
         >
           Sign In

@@ -6,18 +6,43 @@ import Rank from "./components/Rank/Rank.js";
 import FaceRecognition from "./components/FaceRecognition/FaceRecognition.js";
 import SignIn from "./components/SignIn/SignIn.js";
 import Register from "./components/Register/Register.js";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import ParticlesBg from "particles-bg";
 
 function App() {
   const [input, setInput] = useState("");
   const [boxBorder, setBoxBorder] = useState({});
   const [img, setImg] = useState("");
-  const [route, setRoute] = useState("signInPage");
+  const [route, setRoute] = useState("signin");
   const [isSignIn, setIsSignIn] = useState(false);
+  const [user, setUser] = useState({});
 
   const onInputChange = (e) => {
     setInput(e.target.value);
+  };
+
+  const onUserChange = (user) => {
+    setUser(user);
+  };
+
+  const updateUserEntriesNumber = async () => {
+    const req = {
+      method: "put",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        id: user.id,
+      }),
+    }
+      .then((response) => response.json())
+      .then((count) => {
+        setUser({
+          users: {
+            entries: count,
+          },
+        });
+      });
   };
 
   const calculateFacePosition = (data) => {
@@ -69,7 +94,7 @@ function App() {
     return requestOptions;
   };
 
-  const onBtnSubmit = () => {
+  const onPictureSubmit = () => {
     setImg(input);
     fetch(
       "https://api.clarifai.com/v2/models/" + "face-detection" + "/outputs",
@@ -81,15 +106,16 @@ function App() {
           result.outputs[0]?.data?.regions[0]?.region_info?.bounding_box;
 
         if (boundingBox) {
-          console.log(boundingBox);
           const facePosition = calculateFacePosition(result);
-          console.log(facePosition);
           setBoxBorder(facePosition);
         } else {
           console.log("No face detected");
           setBoxBorder({});
         }
       })
+      // .then(() => {
+      //   updateUserEntriesNumber();
+      // })
       .catch((error) => {
         console.log("error", error);
       });
@@ -104,13 +130,6 @@ function App() {
     setRoute(route);
   };
 
-  const renderRoute = () => {
-    if (route === "signInPage") {
-      return <SignIn onRouteChange={onRouteChange} />;
-    } else {
-      return <Register onRouteChange={onRouteChange} />;
-    }
-  };
   return (
     <div className="App">
       <ParticlesBg
@@ -124,15 +143,17 @@ function App() {
       {route === "home" ? (
         <div>
           <Logo />
-          <Rank />
+          <Rank user={user} entries={user.entries} />
           <ImageLinkForm
             onInputChange={onInputChange}
-            buttonSubmit={onBtnSubmit}
+            buttonSubmit={onPictureSubmit}
           />
           <FaceRecognition imageUrl={img} box={boxBorder} />
         </div>
+      ) : route === "signin" ? (
+        <SignIn getUserData={onUserChange} onRouteChange={onRouteChange} />
       ) : (
-        renderRoute()
+        <Register getUserData={onUserChange} onRouteChange={onRouteChange} />
       )}
     </div>
   );

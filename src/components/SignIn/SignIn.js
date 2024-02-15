@@ -1,15 +1,15 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 
-const SignIn = ({ onRouteChange }) => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+const SignIn = ({ onRouteChange, loadUser }) => {
+  const [signInEmail, setSignInEmail] = useState("");
+  const [signInPassword, setSignInPassword] = useState("");
 
   const onEmailChange = (event) => {
-    setEmail(event.target.value);
+    setSignInEmail(event.target.value);
   };
 
   const onPasswordChange = (event) => {
-    setPassword(event.target.value);
+    setSignInPassword(event.target.value);
   };
 
   const onSubmitSignIn = () => {
@@ -17,19 +17,29 @@ const SignIn = ({ onRouteChange }) => {
       method: "post",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        email: email,
-        password: password,
+        email: signInEmail,
+        password: signInPassword,
       }),
     })
-      .then((res) => res.json())
-      .then((response) => console.log(response));
+      .then((response) => response.json())
+      .then((data) => {
+        if (data === "Success") {
+          onRouteChange("home");
+        }
+      });
+    // .then((user) => {
+    //   if (user.id) {
+    //     loadUser(user);
+    //     onRouteChange("home");
+    //   }
+    // });
   };
 
   return (
     <div>
       <article className="br3 ba b--black-10 mv4 w-100 w-50-m w-25-l mw6 shadow-5 center">
         <main className="pa4 black-80">
-          <form className="measure ">
+          <div className="measure ">
             <fieldset id="sign_up" className="ba b--transparent ph0 mh0">
               <legend className="f1 fw6 ph0 mh0">Sign In</legend>
               <div className="mt3">
@@ -42,7 +52,6 @@ const SignIn = ({ onRouteChange }) => {
                   type="email"
                   name="email-address"
                   id="email-address"
-                  value={email}
                 />
               </div>
               <div className="mv3">
@@ -55,7 +64,6 @@ const SignIn = ({ onRouteChange }) => {
                   type="password"
                   name="password"
                   id="password"
-                  value={password}
                 />
               </div>
             </fieldset>
@@ -75,7 +83,7 @@ const SignIn = ({ onRouteChange }) => {
                 Register
               </p>
             </div>
-          </form>
+          </div>
         </main>
       </article>
     </div>
