@@ -25,39 +25,49 @@ function App() {
     setUser(user);
   };
 
-  const updateUserEntriesNumber = async () => {
-    const req = {
-      method: "put",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        id: user.id,
-      }),
-    }
-      .then((response) => response.json())
-      .then((count) => {
-        setUser({
-          users: {
-            entries: count,
-          },
-        });
-      });
-  };
+  // const updateUserEntriesNumber = async (count) => {
+  //   try {
+  //     const req = {
+  //       method: "put",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({
+  //         id: user.id,
+  //         entries: count, // Update the count in the request body
+  //       }),
+  //     };
+  //     const response = await fetch("http://localhost:1234/image", req);
+  //     if (response.ok) {
+  //       const newEntries = await response.json();
+  //       setUser((prevUser) => ({
+  //         ...prevUser,
+  //         entries: newEntries[0].entries,
+  //       }));
+  //     }
+  //   } catch (err) {
+  //     console.log(err);
+  //   }
+  // };
 
   const calculateFacePosition = (data) => {
-    const clarifiFace =
-      data.outputs[0].data.regions[0].region_info.bounding_box;
-    const image = document.getElementById("inputImage");
-    const width = Number(image.width);
-    const height = Number(image.height);
+    if (data?.outputs?.[0]?.data?.regions?.[0]?.region_info) {
+      const clarifiFace =
+        data.outputs[0].data.regions[0].region_info.bounding_box;
+      const image = document.getElementById("inputImage");
+      const width = Number(image.width);
+      const height = Number(image.height);
 
-    return {
-      leftCol: clarifiFace.left_col * width,
-      topRow: clarifiFace.top_row * height,
-      rightCol: width - clarifiFace.right_col * width,
-      bottomRow: height - clarifiFace.bottom_row * height,
-    };
+      return {
+        leftCol: clarifiFace.left_col * width,
+        topRow: clarifiFace.top_row * height,
+        rightCol: width - clarifiFace.right_col * width,
+        bottomRow: height - clarifiFace.bottom_row * height,
+      };
+    } else {
+      console.log("No face detected");
+      return {};
+    }
   };
 
   const returnClarifiRequestOptions = (imageUrl) => {
@@ -100,24 +110,41 @@ function App() {
       "https://api.clarifai.com/v2/models/" + "face-detection" + "/outputs",
       returnClarifiRequestOptions(input)
     )
-      .then((response) => response.json())
-      .then((result) => {
-        const boundingBox =
-          result.outputs[0]?.data?.regions[0]?.region_info?.bounding_box;
-
-        if (boundingBox) {
-          const facePosition = calculateFacePosition(result);
-          setBoxBorder(facePosition);
-        } else {
-          console.log("No face detected");
-          setBoxBorder({});
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
         }
+        return response.json();
       })
-      // .then(() => {
-      //   updateUserEntriesNumber();
-      // })
+      .then((result) => {
+        console.log("The result", result);
+        if (result) {
+          fetch(`http://localhost:1234/image?id=${user.id}`, {
+            method: "put",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              id: user.id,
+            }),
+          })
+            .then((response) => {
+              if (!response.ok) {
+                console.log("The error is", response);
+                throw new Error("Network response was not ok");
+              }
+              return response.json();
+            })
+            .then((count) => {
+              setUser((prevUser) => ({ ...prevUser, entries: count }));
+              // updateUserEntriesNumber();
+            })
+            .catch((error) => {
+              console.error("Error updating user entries:", error);
+            });
+        }
+        setBoxBorder(calculateFacePosition(result));
+      })
       .catch((error) => {
-        console.log("error", error);
+        console.error("Error detecting faces:", error);
       });
   };
 
@@ -139,11 +166,15 @@ function App() {
         color="#ff0000"
         num={200}
       />
-      <Navigation isSignIn={isSignIn} onRouteChange={onRouteChange} />
+      <Navigation
+        user={user}
+        isSignIn={isSignIn}
+        onRouteChange={onRouteChange}
+      />
       {route === "home" ? (
         <div>
           <Logo />
-          <Rank user={user} entries={user.entries} />
+          <Rank user={user} />
           <ImageLinkForm
             onInputChange={onInputChange}
             buttonSubmit={onPictureSubmit}
@@ -151,9 +182,9 @@ function App() {
           <FaceRecognition imageUrl={img} box={boxBorder} />
         </div>
       ) : route === "signin" ? (
-        <SignIn getUserData={onUserChange} onRouteChange={onRouteChange} />
+        <SignIn loadUser={onUserChange} onRouteChange={onRouteChange} />
       ) : (
-        <Register getUserData={onUserChange} onRouteChange={onRouteChange} />
+        <Register loadUser={onUserChange} onRouteChange={onRouteChange} />
       )}
     </div>
   );

@@ -23,8 +23,9 @@ const SignIn = ({ onRouteChange, loadUser }) => {
     })
       .then((response) => response.json())
       .then((data) => {
-        if (data === "Success") {
+        if (data) {
           onRouteChange("home");
+          loadUser(data);
         }
       });
     // .then((user) => {
