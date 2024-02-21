@@ -16,6 +16,7 @@ function App() {
   const [route, setRoute] = useState("signin");
   const [isSignIn, setIsSignIn] = useState(false);
   const [user, setUser] = useState({});
+  const [errorMsg, setErrorMsg] = useState("");
 
   const onInputChange = (e) => {
     setInput(e.target.value);
@@ -105,6 +106,11 @@ function App() {
   };
 
   const onPictureSubmit = () => {
+    setErrorMsg("");
+    if (input.length === 0) {
+      setErrorMsg("Input can not be empty");
+      return;
+    }
     setImg(input);
     fetch(
       "https://api.clarifai.com/v2/models/" + "face-detection" + "/outputs",
@@ -132,6 +138,11 @@ function App() {
                 throw new Error("Network response was not ok");
               }
               return response.json();
+            })
+            .then((result) => {
+              if (result.outputs[0].status.code === 30104) {
+                setErrorMsg("URL cannot be longer than 2000 characters.");
+              }
             })
             .then((count) => {
               setUser((prevUser) => ({ ...prevUser, entries: count }));

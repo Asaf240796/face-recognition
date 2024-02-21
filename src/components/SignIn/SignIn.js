@@ -22,10 +22,12 @@ const SignIn = ({ onRouteChange, loadUser }) => {
       }),
     })
       .then((response) => response.json())
-      .then((data) => {
-        if (data) {
+      .then((user) => {
+        if (user.id) {
           onRouteChange("home");
-          loadUser(data);
+          loadUser(user);
+        } else {
+          alert("email or password is incorrect");
         }
       });
     // .then((user) => {
