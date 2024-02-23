@@ -26,30 +26,26 @@ function App() {
     setUser(user);
   };
 
-  // const updateUserEntriesNumber = async (count) => {
-  //   try {
-  //     const req = {
-  //       method: "put",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify({
-  //         id: user.id,
-  //         entries: count, // Update the count in the request body
-  //       }),
-  //     };
-  //     const response = await fetch("http://localhost:1234/image", req);
-  //     if (response.ok) {
-  //       const newEntries = await response.json();
-  //       setUser((prevUser) => ({
-  //         ...prevUser,
-  //         entries: newEntries[0].entries,
-  //       }));
-  //     }
-  //   } catch (err) {
-  //     console.log(err);
-  //   }
-  // };
+  const updateUserEntriesNumber = async () => {
+    try {
+      const req = {
+        method: "put",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: user.id,
+        }),
+      };
+      const response = await fetch("http://localhost:1234/image", req);
+      if (response.ok) {
+        const newEntries = await response.json();
+        setUser({ ...user, entries: newEntries[0].entries });
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   const calculateFacePosition = (data) => {
     if (data?.outputs?.[0]?.data?.regions?.[0]?.region_info) {
@@ -139,14 +135,10 @@ function App() {
               }
               return response.json();
             })
-            .then((result) => {
-              if (result.outputs[0].status.code === 30104) {
-                setErrorMsg("URL cannot be longer than 2000 characters.");
-              }
-            })
-            .then((count) => {
-              setUser((prevUser) => ({ ...prevUser, entries: count }));
-              // updateUserEntriesNumber();
+
+            .then(() => {
+              setErrorMsg("");
+              updateUserEntriesNumber();
             })
             .catch((error) => {
               console.error("Error updating user entries:", error);
@@ -160,6 +152,9 @@ function App() {
   };
 
   const onRouteChange = (route) => {
+    setErrorMsg("");
+    setImg("");
+    setBoxBorder({});
     if (route === "signout") {
       setIsSignIn(false);
     } else if (route === "home") {
@@ -190,6 +185,7 @@ function App() {
             onInputChange={onInputChange}
             buttonSubmit={onPictureSubmit}
           />
+          <p className="f3 red db">{errorMsg}</p>
           <FaceRecognition imageUrl={img} box={boxBorder} />
         </div>
       ) : route === "signin" ? (

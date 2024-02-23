@@ -12,30 +12,31 @@ const SignIn = ({ onRouteChange, loadUser }) => {
     setSignInPassword(event.target.value);
   };
 
-  const onSubmitSignIn = () => {
-    fetch("http://localhost:1234/signin", {
-      method: "post",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email: signInEmail,
-        password: signInPassword,
-      }),
-    })
-      .then((response) => response.json())
-      .then((user) => {
+  const onSubmitSignIn = async () => {
+    try {
+      const response = await fetch("http://localhost:1234/signin", {
+        method: "post",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: signInEmail,
+          password: signInPassword,
+        }),
+      });
+
+      if (response.ok) {
+        const user = await response.json();
         if (user.id) {
           onRouteChange("home");
           loadUser(user);
         } else {
           alert("email or password is incorrect");
         }
-      });
-    // .then((user) => {
-    //   if (user.id) {
-    //     loadUser(user);
-    //     onRouteChange("home");
-    //   }
-    // });
+      } else {
+        console.error("Failed to sign in:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Error signing in:", error);
+    }
   };
 
   return (
@@ -80,8 +81,8 @@ const SignIn = ({ onRouteChange, loadUser }) => {
             </div>
             <div className="lh-copy mt3">
               <p
-                className="f6 link dim black db pointer"
                 onClick={() => onRouteChange("register")}
+                className="f6 link dim black db pointer"
               >
                 Register
               </p>
