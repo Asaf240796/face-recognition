@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import axios from "axios";
 
 const Register = ({ onRouteChange, loadUser }) => {
   const [email, setEmail] = useState("");
@@ -17,24 +18,41 @@ const Register = ({ onRouteChange, loadUser }) => {
     setName(e.target.value);
   };
 
-  const onSubmitSignin = () => {
-    fetch("http://localhost:1234/register", {
-      method: "post",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email: email,
-        password: password,
-        name: name,
-      }),
-    })
-      .then((res) => res.json())
-      .then((user) => {
-        if (user.id) {
-          loadUser(user);
-          onRouteChange("home");
-        }
-      });
+  const onSubmitSignin = async () => {
+    const url = "http://localhost:1234/register";
+    const body = {
+      email: email,
+      password: password,
+      name: name,
+    };
+    try {
+      const { data: user } = await axios.post(url, body);
+      if (user.id) {
+        loadUser(user);
+        onRouteChange("home");
+      }
+      console.log(user);
+    } catch (error) {}
   };
+
+  // const onSubmitSignin = () => {
+  //   fetch("http://localhost:1234/register", {
+  //     method: "post",
+  //     headers: { "Content-Type": "application/json" },
+  //     body: JSON.stringify({
+  //       email: email,
+  //       password: password,
+  //       name: name,
+  //     }),
+  //   })
+  //     .then((res) => res.json())
+  //     .then((user) => {
+  //       if (user.id) {
+  //         loadUser(user);
+  //         onRouteChange("home");
+  //       }
+  //     });
+  // };
 
   return (
     <div>

@@ -26,25 +26,9 @@ function App() {
     setUser(user);
   };
 
-  const updateUserEntriesNumber = async () => {
-    try {
-      const req = {
-        method: "put",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          id: user.id,
-        }),
-      };
-      const response = await fetch("http://localhost:1234/image", req);
-      if (response.ok) {
-        const newEntries = await response.json();
-        setUser({ ...user, entries: newEntries[0].entries });
-      }
-    } catch (err) {
-      console.log(err);
-    }
+  const updateUserEntriesNumber = (response) => {
+    const newEntries = response;
+    setUser({ ...user, entries: newEntries });
   };
 
   const calculateFacePosition = (data) => {
@@ -109,7 +93,7 @@ function App() {
     }
     setImg(input);
     fetch(
-      "https://api.clarifai.com/v2/models/" + "face-detection" + "/outputs",
+      "https://api.clarifai.com/v2/models/face-detection/outputs",
       returnClarifiRequestOptions(input)
     )
       .then((response) => {
@@ -135,10 +119,9 @@ function App() {
               }
               return response.json();
             })
-
-            .then(() => {
+            .then((response) => {
               setErrorMsg("");
-              updateUserEntriesNumber();
+              updateUserEntriesNumber(response);
             })
             .catch((error) => {
               console.error("Error updating user entries:", error);
