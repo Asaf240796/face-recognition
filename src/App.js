@@ -8,6 +8,7 @@ import SignIn from "./components/SignIn/SignIn.js";
 import Register from "./components/Register/Register.js";
 import React, { useState } from "react";
 import ParticlesBg from "particles-bg";
+import axios from "axios";
 
 function App() {
   const [input, setInput] = useState("");
@@ -51,58 +52,47 @@ function App() {
     }
   };
 
-  const onPictureSubmit = () => {
+  const onPictureSubmit = async () => {
     setErrorMsg("");
     if (input.length === 0) {
       setErrorMsg("Input can not be empty");
       return;
     }
     setImg(input);
-    fetch(`http://localhost:1234/imageurl`, {
-      method: "post",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        input: input,
-      }),
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
+    const body1 = {
+      input: input,
+    };
+    try {
+      const { data: response } = await axios.post(
+        `http://localhost:1234/imageurl`,
+        body1
+      );
+      if (response.status.description !== "Ok") {
+        throw new Error("Network response was not ok");
+      }
+      if (response) {
+        const body = {
+          id: user.id,
+        };
+        try {
+          const { data: userResponse } = await axios.put(
+            `http://localhost:1234/image?id=${user.id}`,
+            body
+          );
+          if (!userResponse) {
+            console.log("The error is", userResponse);
+            throw new Error("Network response was not ok");
+          }
+          setErrorMsg("");
+          updateUserEntriesNumber(userResponse);
+        } catch (error) {
+          console.error("Error updating user entries:", error);
         }
-        return response.json();
-      })
-      .then((result) => {
-        console.log("The result", result);
-        if (result) {
-          fetch(`http://localhost:1234/image?id=${user.id}`, {
-            method: "put",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              id: user.id,
-            }),
-          })
-            .then((response) => {
-              if (!response.ok) {
-                console.log("The error is", response);
-                throw new Error("Network response was not ok");
-              }
-              return response.json();
-            })
-            .then((response) => {
-              setErrorMsg("");
-              updateUserEntriesNumber(response);
-            })
-            .catch((error) => {
-              console.error("Error updating user entries:", error);
-            });
-        }
-        setBoxBorder(calculateFacePosition(result));
-      })
-      .catch((error) => {
-        console.error("Error detecting faces:", error);
-      });
+      }
+      setBoxBorder(calculateFacePosition(response));
+    } catch (error) {
+      console.error("Error detecting faces:", error);
+    }
   };
 
   const onRouteChange = (route) => {

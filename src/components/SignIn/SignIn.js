@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import axios from "axios";
 
 const SignIn = ({ onRouteChange, loadUser }) => {
   const [signInEmail, setSignInEmail] = useState("");
@@ -13,18 +14,14 @@ const SignIn = ({ onRouteChange, loadUser }) => {
   };
 
   const onSubmitSignIn = async () => {
+    const url = "http://localhost:1234/signin";
+    const body = {
+      email: signInEmail,
+      password: signInPassword,
+    };
     try {
-      const response = await fetch("http://localhost:1234/signin", {
-        method: "post",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: signInEmail,
-          password: signInPassword,
-        }),
-      });
-
-      if (response.ok) {
-        const user = await response.json();
+      const { data: user } = await axios.post(url, body);
+      if (user) {
         if (user.id) {
           onRouteChange("home");
           loadUser(user);
@@ -32,7 +29,7 @@ const SignIn = ({ onRouteChange, loadUser }) => {
           alert("email or password is incorrect");
         }
       } else {
-        console.error("Failed to sign in:", response.statusText);
+        console.error("Failed to sign in:", user.statusText);
       }
     } catch (error) {
       console.error("Error signing in:", error);
