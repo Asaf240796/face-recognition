@@ -2,6 +2,11 @@ import React from "react";
 import "./ImageLinkForm.css";
 
 const ImageLinkForm = ({ onInputChange, buttonSubmit }) => {
+  const handleKeyPress = (event) => {
+    if (event.key === "Enter") {
+      buttonSubmit();
+    }
+  };
   return (
     <div>
       <p className="f3">
@@ -13,6 +18,7 @@ const ImageLinkForm = ({ onInputChange, buttonSubmit }) => {
             className="f4 pa2 w-70 center"
             type="text"
             onChange={onInputChange}
+            onKeyDown={handleKeyPress}
           />
           <button
             className="Detect w-30 grow f4 link ph3 pv2 dib white bg-light-purple "

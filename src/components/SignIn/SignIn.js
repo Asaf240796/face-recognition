@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 
 const SignIn = ({ onRouteChange, loadUser }) => {
   const [signInEmail, setSignInEmail] = useState("");
   const [signInPassword, setSignInPassword] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
 
   const onEmailChange = (event) => {
     setSignInEmail(event.target.value);
@@ -13,7 +14,11 @@ const SignIn = ({ onRouteChange, loadUser }) => {
     setSignInPassword(event.target.value);
   };
 
-  const onSubmitSignIn = async () => {
+  const onSubmitSignIn = useCallback(async () => {
+    if (signInEmail.length === 0 || signInPassword.length === 0) {
+      setErrorMsg("Email or Password can not be empty");
+      return;
+    }
     const url = "http://localhost:1234/signin";
     const body = {
       email: signInEmail,
@@ -21,20 +26,29 @@ const SignIn = ({ onRouteChange, loadUser }) => {
     };
     try {
       const { data: user } = await axios.post(url, body);
-      if (user) {
-        if (user.id) {
-          onRouteChange("home");
-          loadUser(user);
-        } else {
-          alert("email or password is incorrect");
-        }
+      if (user && user.id) {
+        onRouteChange("home");
+        loadUser(user);
       } else {
-        console.error("Failed to sign in:", user.statusText);
+        alert("email or password is incorrect");
       }
     } catch (error) {
       console.error("Error signing in:", error);
     }
-  };
+  }, [signInEmail, signInPassword, onRouteChange, loadUser]);
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.keyCode === 13) {
+        onSubmitSignIn();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [onSubmitSignIn]);
 
   return (
     <div>
@@ -83,6 +97,7 @@ const SignIn = ({ onRouteChange, loadUser }) => {
               >
                 Register
               </p>
+              <p className="f3 red db">{errorMsg}</p>
             </div>
           </div>
         </main>

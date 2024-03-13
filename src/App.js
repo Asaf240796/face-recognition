@@ -47,7 +47,7 @@ function App() {
         bottomRow: height - clarifiFace.bottom_row * height,
       };
     } else {
-      console.log("No face detected");
+      setErrorMsg("No face detected");
       return {};
     }
   };
@@ -68,6 +68,9 @@ function App() {
         body1
       );
       if (response.status.description !== "Ok") {
+        if (response.status.code === 30104) {
+          setErrorMsg("URL cannot be longer than 2000 characters.");
+        }
         throw new Error("Network response was not ok");
       }
       if (response) {
@@ -91,7 +94,9 @@ function App() {
       }
       setBoxBorder(calculateFacePosition(response));
     } catch (error) {
+      setErrorMsg("Error detecting faces");
       console.error("Error detecting faces:", error);
+      setBoxBorder({});
     }
   };
 
