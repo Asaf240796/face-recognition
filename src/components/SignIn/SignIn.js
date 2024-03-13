@@ -19,7 +19,7 @@ const SignIn = ({ onRouteChange, loadUser }) => {
       setErrorMsg("Email or Password can not be empty");
       return;
     }
-    const url = "http://localhost:1234/signin";
+    const url = "https://face-recognition-backend-ie1g.onrender.com/signin";
     const body = {
       email: signInEmail,
       password: signInPassword,

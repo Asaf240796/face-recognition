@@ -19,7 +19,7 @@ const Register = ({ onRouteChange, loadUser }) => {
   };
 
   const onSubmitSignin = async () => {
-    const url = "http://localhost:1234/register";
+    const url = "https://face-recognition-backend-ie1g.onrender.com/register";
     const body = {
       email: email,
       password: password,

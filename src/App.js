@@ -64,7 +64,7 @@ function App() {
     };
     try {
       const { data: response } = await axios.post(
-        `http://localhost:1234/imageurl`,
+        `https://face-recognition-backend-ie1g.onrender.com/imageurl`,
         body1
       );
       if (response.status.description !== "Ok") {
@@ -79,7 +79,7 @@ function App() {
         };
         try {
           const { data: userResponse } = await axios.put(
-            `http://localhost:1234/image?id=${user.id}`,
+            `https://face-recognition-backend-ie1g.onrender.com/image?id=${user.id}`,
             body
           );
           if (!userResponse) {
