@@ -104,7 +104,6 @@ const Register = ({ onRouteChange, loadUser }) => {
                 type="submit"
                 value="Register"
                 onClick={onSubmitSignin}
-                // onClick={() => onRouteChange("home")}
               />
             </div>
           </div>
