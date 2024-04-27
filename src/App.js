@@ -12,7 +12,7 @@ import axios from "axios";
 
 function App() {
   const [input, setInput] = useState("");
-  const [boxBorder, setBoxBorder] = useState({});
+  const [boxBorder, setBoxBorder] = useState([]);
   const [img, setImg] = useState("");
   const [route, setRoute] = useState("signin");
   const [isSignIn, setIsSignIn] = useState(false);
@@ -26,6 +26,11 @@ function App() {
   const onUserChange = (user) => {
     setUser(user);
   };
+  const displayBox = (boxes) => {
+    if (boxes) {
+      setBoxBorder(boxes);
+    }
+  };
 
   const updateUserEntriesNumber = (response) => {
     const newEntries = response;
@@ -33,19 +38,20 @@ function App() {
   };
 
   const calculateFacePosition = (data) => {
-    if (data?.outputs?.[0]?.data?.regions?.[0]?.region_info) {
-      const clarifiFace =
-        data.outputs[0].data.regions[0].region_info.bounding_box;
-      const image = document.getElementById("inputImage");
-      const width = Number(image.width);
-      const height = Number(image.height);
-
-      return {
-        leftCol: clarifiFace.left_col * width,
-        topRow: clarifiFace.top_row * height,
-        rightCol: width - clarifiFace.right_col * width,
-        bottomRow: height - clarifiFace.bottom_row * height,
-      };
+    const image = document.getElementById("inputImage");
+    const width = Number(image.width);
+    const height = Number(image.height);
+    if (data) {
+      return data.map((face) => {
+        const { left_col, top_row, right_col, bottom_row } =
+          face.region_info.bounding_box;
+        return {
+          leftCol: left_col * width,
+          topRow: top_row * height,
+          rightCol: width - right_col * width,
+          bottomRow: height - bottom_row * height,
+        };
+      });
     } else {
       setErrorMsg("No face detected");
       return {};
@@ -92,7 +98,9 @@ function App() {
           console.error("Error updating user entries:", error);
         }
       }
-      setBoxBorder(calculateFacePosition(response));
+      return displayBox(
+        setBoxBorder(calculateFacePosition(response.outputs[0].data.regions))
+      );
     } catch (error) {
       setErrorMsg("Error detecting faces");
       console.error("Error detecting faces:", error);
@@ -135,7 +143,7 @@ function App() {
             buttonSubmit={onPictureSubmit}
           />
           <p className="f3 red db">{errorMsg}</p>
-          <FaceRecognition imageUrl={img} box={boxBorder} />
+          <FaceRecognition imageUrl={img} boxes={boxBorder} />
         </div>
       ) : route === "signin" ? (
         <SignIn loadUser={onUserChange} onRouteChange={onRouteChange} />
